@@ -37,14 +37,41 @@ jobs:
         name: XDebugToggler
         path: ./publish
         
-    - name: Create Release
+    - name: Get Latest Release
+      id: get_latest_release
+      run: |
+        latest_release="$(git describe --tags --abbrev=0)"
+        echo "latest_release=$latest_release" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Create New Release
       id: create_release
+      run: |
+        latest_release="${{ env.latest_release }}"
+        if [ -z "$latest_release" ]; then
+          new_version="v1.0.0"  # İlk sürüm
+        else
+          # Artan bir sürüm numarası oluştur
+          major_version=$(echo "$latest_release" | cut -d. -f1 | sed 's/v//')
+          minor_version=$(echo "$latest_release" | cut -d. -f2)
+          patch_version=$(echo "$latest_release" | cut -d. -f3)
+          new_patch_version=$((patch_version + 1))
+          new_version="v$major_version.$minor_version.$new_patch_version"
+        fi
+        echo "New Release Version: $new_version"
+        echo "NewReleaseVersion=$new_version" >> $GITHUB_ENV
+      shell: bash
+      
+    - name: Push New Release
+      run: git tag -a ${{ env.NewReleaseVersion }} -m "Release ${{ env.NewReleaseVersion }}"
+      if: success()
+
+    - name: Create GitHub Release
+      id: create_github_release
       uses: softprops/action-gh-release@v1
       with:
         files: ./publish/*
+        tag_name: ${{ env.NewReleaseVersion }}
+        release_name: ${{ env.NewReleaseVersion }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Get Release URL
-      run: |
-        echo "Release URL: ${{ steps.create_release.outputs.upload_url }}"
