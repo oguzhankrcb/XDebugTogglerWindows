@@ -76,11 +76,15 @@ jobs:
       run: git tag -a ${{ env.NewReleaseVersion }} -m "Release ${{ env.NewReleaseVersion }}"
       if: success()
 
+    - name: Zip Files
+      run: |
+        zip -r XDebugToggler.zip ./publish
+
     - name: Create GitHub Release
       id: create_github_release
       uses: softprops/action-gh-release@v1
       with:
-        files: ./publish/*
+        files: ./XDebugToggler.zip
         tag_name: ${{ env.NewReleaseVersion }}
         name: ${{ env.NewReleaseVersion }}
       env:
