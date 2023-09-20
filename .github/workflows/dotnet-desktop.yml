@@ -26,8 +26,10 @@ jobs:
 
     - name: Publish
       run: |
+        echo "PUBLISH_PATH=$(pwd)/publish" > .env
+        export $(cat .env | xargs)
         dotnet publish -c Release -o ./publish
-        echo "::set-output name=publish_path::$(pwd)/publish"
+      shell: bash
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
