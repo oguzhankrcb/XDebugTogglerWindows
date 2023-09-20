@@ -36,6 +36,16 @@ jobs:
       with:
         name: XDebugToggler
         path: ./publish
+
+    - name: Set Git Identity
+      run: |
+        git config --global user.email "oguzhankrcb@gmail.com"
+        git config --global user.name "Oğuzhan KARACABAY"
+      env:
+        GIT_AUTHOR_EMAIL: oguzhankrcb@gmail.com
+        GIT_AUTHOR_NAME: Oğuzhan KARACABAY
+        GIT_COMMITTER_EMAIL: oguzhankrcb@gmail.com
+        GIT_COMMITTER_NAME: Oğuzhan KARACABAY
         
     - name: Get Latest Release
       id: get_latest_release
