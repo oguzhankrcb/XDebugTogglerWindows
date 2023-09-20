@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 7.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Test
+      run: dotnet test
+
+    - name: Publish
+      run: |
+        dotnet publish -c Release -o ./publish
+        echo "::set-output name=publish_path::$(pwd)/publish"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: windows-form-app
+        path: ${{ steps.publish.outputs.publish_path }}
