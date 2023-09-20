@@ -82,6 +82,6 @@ jobs:
       with:
         files: ./publish/*
         tag_name: ${{ env.NewReleaseVersion }}
-        release_name: ${{ env.NewReleaseVersion }}
+        name: ${{ env.NewReleaseVersion }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
