@@ -50,6 +50,7 @@ jobs:
     - name: Get Latest Release
       id: get_latest_release
       run: |
+        git fetch --tags
         latest_release="$(git describe --tags --abbrev=0 || echo v1.0.0)"
         echo "latest_release=$latest_release" >> $GITHUB_ENV
       shell: bash
