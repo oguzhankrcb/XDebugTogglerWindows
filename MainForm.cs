@@ -8,7 +8,7 @@ namespace XDebugTogglerWindows
     public partial class MainForm : Form
     {
         private readonly IConfigManager configManager;
-        private IniParser iniParser;
+        private IniParser? iniParser = null;
         private bool xDebugStatus = false;
         public MainForm()
         {
@@ -94,13 +94,15 @@ namespace XDebugTogglerWindows
         }
         private void setStartup(bool status)
         {
-            RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-            if (status)
-                rk.SetValue("XdebugToggler", Application.ExecutablePath);
-            else
-                rk.DeleteValue("XdebugToggler", false);
-
+            if (registryKey != null)
+            {
+                if (status)
+                    registryKey.SetValue("XdebugToggler", Application.ExecutablePath);
+                else
+                    registryKey.DeleteValue("XdebugToggler", false);
+            }
         }
 
         private void showToolStripMenuItem_Click(object sender, EventArgs e)
@@ -136,12 +138,12 @@ namespace XDebugTogglerWindows
             {
                 if (xDebugStatus == true)
                 {
-                    iniParser.DeleteKey("zend_extension", "XDebug");
+                    iniParser?.DeleteKey("zend_extension", "XDebug");
                     changeNotifyIconStatus(false);
                 }
                 else
                 {
-                    iniParser.Write("zend_extension", configManager.ReadFromConfigFile("xdebug_extension_path"), "XDebug");
+                    iniParser?.Write("zend_extension", configManager.ReadFromConfigFile("xdebug_extension_path"), "XDebug");
                     changeNotifyIconStatus(true);
                 }
             }
