@@ -1,6 +1,4 @@
-using System.Windows.Forms;
-using Microsoft.Win32;
-using System.Resources;
+using Microsoft.Win32.TaskScheduler;
 using XDebugTogglerWindows.Config;
 
 namespace XDebugTogglerWindows
@@ -45,6 +43,8 @@ namespace XDebugTogglerWindows
                     changeNotifyIconStatus(false);
                 }
             }
+            this.WindowState = FormWindowState.Minimized;
+            this.ShowInTaskbar = false;
             notifyIcon.ShowBalloonTip(5, "Hey!", "XDebugToggler works in system tray!", ToolTipIcon.Info);
         }
 
@@ -94,14 +94,27 @@ namespace XDebugTogglerWindows
         }
         private void setStartup(bool status)
         {
-            var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
-            if (registryKey != null)
+            using (TaskService ts = new TaskService())
             {
-                if (status)
-                    registryKey.SetValue("XdebugToggler", Application.ExecutablePath);
+                if (status == true)
+                {
+                    if (ts.GetTask("XDebugToggler") == null)
+                    {
+                        TaskDefinition td = ts.NewTask();
+                        td.Principal.RunLevel = TaskRunLevel.Highest;
+
+                        td.Triggers.AddNew(TaskTriggerType.Logon);
+
+                        td.Actions.Add(new ExecAction(Application.ExecutablePath, null));
+                        ts.RootFolder.RegisterTaskDefinition("XDebugToggler", td);
+                    }
+                }
                 else
-                    registryKey.DeleteValue("XdebugToggler", false);
+                {
+                    if (ts.GetTask("XDebugToggler") != null) {
+                        ts.RootFolder.DeleteTask("XDebugToggler");
+                    }
+                }
             }
         }
 
